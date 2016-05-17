@@ -9,7 +9,7 @@ library(dplyr)
 library(png)
 library(grid)
 
-setwd("C:/Users/Craig/Desktop/El Nino")
+setwd("C:/Users/Craig/Desktop/El Nino/El_Nino")
 source('EN_load.R')
 
 ###############################################################################
@@ -34,14 +34,24 @@ makepng <- function(row,scale='projects') {
     lsize <- sum(s)
   }
   limits <- c(-lsize,lsize)
-  inset <- diff(limits) / 3
+  if (ncircles == 1) { 
+    xyr=data.frame(x=0,y=0,r=rad)
+    dat.after <- circlePlotData(xyr)
+    print('Just one circle.')
+  } else {
+    inset <- (diff(limits) - sqrt(sum(row)))/2
+    if (inset < 0) {
+      inset <- diff(limits) / 3
+    }
   set.seed(123)
-  xyr <- data.frame(
-    x = runif(ncircles, min(limits) + inset,0)*(2*as.numeric(hum)-1),
-    y = runif(ncircles, min(limits) + inset, max(limits) - inset),
-    r = rad)
-  res <- circleLayout(xyr, limits, limits, maxiter = 1000)
-  dat.after <- circlePlotData(res$layout)
+    xyr <- data.frame(
+      x = runif(ncircles, min(limits) + inset,0)*(2*as.numeric(hum)-1),
+      y = runif(ncircles, min(limits) + inset, max(limits) - inset),
+      r = rad)
+    res <- circleLayout(xyr, limits, limits, maxiter = 2000)
+    #cat(res$niter, "iterations performed")
+    dat.after <- circlePlotData(res$layout)
+  }
   dat.color <- color[dat.after$id]
   labels <- ddply(dat.after,'id',numcolwise(mean))
   labels$text <- n
@@ -71,14 +81,14 @@ makepng <- function(row,scale='projects') {
   labels$ymin <- labels$y - labels$r/sqrt(2)
   labels$ymax <- labels$y + labels$r/sqrt(2)
   
-  labels[grep('^food_',labels$text),'fname'] <- 'icon_food.png'
-  labels[grep('^nutrition_',labels$text),'fname'] <- 'icon_nutrition.png'
-  labels[grep('^wash_',labels$text),'fname'] <- 'icon_WASH.png'
-  labels[grep('^ag_',labels$text),'fname'] <- 'icon_ag.png'
-  labels[grep('^health_',labels$text),'fname'] <- 'icon_health.png'
-  labels[grep('^ed_',labels$text),'fname'] <- 'icon_education.png'
-  labels[grep('^shelter_',labels$text),'fname'] <- 'icon_shelter.png'
-  labels[grep('^protection_',labels$text),'fname'] <- 'icon_protection.png'
+  labels[grep('^food_',labels$text),'fname'] <- '../icon_food.png'
+  labels[grep('^nutrition_',labels$text),'fname'] <- '../icon_nutrition.png'
+  labels[grep('^wash_',labels$text),'fname'] <- '../icon_WASH.png'
+  labels[grep('^ag_',labels$text),'fname'] <- '../icon_ag.png'
+  labels[grep('^health_',labels$text),'fname'] <- '../icon_health.png'
+  labels[grep('^ed_',labels$text),'fname'] <- '../icon_education.png'
+  labels[grep('^shelter_',labels$text),'fname'] <- '../icon_shelter.png'
+  labels[grep('^protection_',labels$text),'fname'] <- '../icon_protection.png'
   wicons <- notext 
   for (i in labels[!is.na(labels$fname),'id']) {
     img <- readPNG(labels[labels$id==i,'fname'])
@@ -90,7 +100,7 @@ makepng <- function(row,scale='projects') {
                                          ymax=labels[labels$id==i,'ymax'])
     
   }
-  fname=paste(country,scale,'0503.png',sep='_')
+  fname=paste(country,scale,'0517.png',sep='_')
   print(paste('Writing',fname,'...'))
   ggsave(fname,wicons,bg='transparent',
          width=3,height=3,units='in')
@@ -99,7 +109,38 @@ makepng <- function(row,scale='projects') {
 
 ###############################################################################
 
-makepng(geo_budget[1,],scale='budget')
-
 makepng(geo_projects[1,])
 
+for (i in 1:5) {
+  makepng(geo_budget[i,],scale='budget')
+  makepng(geo_projects[i,])
+}
+
+# Make legend bubbles for budget and projects
+m <- as.matrix(geo_budget[,4:21])
+m[m==0] <- NA
+quantile(m,na.rm=TRUE)
+# So I want bubbles for $100k, $1M, $10M, $100M
+
+m <- as.matrix(geo_projects[,4:21])
+m[m==0] <- NA
+quantile(m,na.rm=TRUE)
+# Make bubbles for 1,2,5,10 projects
+
+legend_budget <- geo_budget[1:4,]
+legend_budget$mission <- c('100k','1M','10M','100M')
+legend_budget[,2:21] <- 0
+legend_budget$other_dev <- c(1e5,1e6,1e7,1e8)
+
+legend_projects <- legend_budget
+legend_projects$mission <- c('1','2','5','10')
+legend_projects$other_dev <- c(1,2,5,10)
+
+for (i in 1:4) {
+  makepng(legend_budget[i,],scale='budget')
+  makepng(legend_projects[i,])
+}
+
+red <- legend_projects[1,]
+red[1,c('other_dev','other_hum')] <- c(0,1)
+makepng(red)
