@@ -6,9 +6,6 @@ library(ggplot2)
 library(reshape)
 library(dplyr)
 
-# Colors
-blue <- '#6CAFCC'
-yellow <- '#EBE85D'
 
 # Labels
 labels <- c('Food','Nutrition','WASH','Agriculture','Health','Education',
@@ -20,7 +17,7 @@ budget_totals <- colSums(geo_budget[,4:21])
 
 
 # Plotting function
-myplot <- function(d) {
+myplot <- function(d,hum_color='#EBE85D',dev_color='#6CAFCC') {
   d_reshape <- data.frame(label=labels,dev=d[2*1:9-1],
                                hum=d[2*1:9]) 
   label_sort <- as.character(d_reshape$label[order(d_reshape$dev + d_reshape$hum)])
@@ -31,7 +28,7 @@ myplot <- function(d) {
   ggplot(d_reshape,aes(x=label,y=value,fill=variable)) +
     geom_bar(stat='identity',alpha=0.5) +
     theme_classic() +
-    scale_fill_manual(values=c(blue,yellow)) +
+    scale_fill_manual(values=c(dev_color,hum_color)) +
     coord_flip() 
 }
 
