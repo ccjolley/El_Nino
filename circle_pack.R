@@ -9,12 +9,13 @@ library(dplyr)
 library(png)
 library(grid)
 
-setwd("C:/Users/Craig/Desktop/El Nino/El_Nino")
+setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
 source('EN_load.R')
+setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
 
 ###############################################################################
 
-makepng <- function(row,scale='projects') {
+makepng <- function(row,scale='projects',hum_color='#EBE85D',dev_color='#6CAFCC') {
   # right now the 'scale' option doesn't do anything; in the future I'll want
   # to be able to scale by either number of projects or total funding level.
   country <- row[1,1]
@@ -23,7 +24,7 @@ makepng <- function(row,scale='projects') {
   s <- row[row>0]
   rad <- sqrt(s)
   hum <- 1:length(n) %in% grep('hum',n)
-  color <- ifelse(hum,"#CB654F","#8CBEA3")
+  color <- ifelse(hum,hum_color,dev_color)
   # Adapted from http://www.r-bloggers.com/circle-packing-in-r-again/
   ncircles <- length(n)
   if (scale == 'projects') {
@@ -103,13 +104,13 @@ makepng <- function(row,scale='projects') {
   fname=paste(country,scale,'0517.png',sep='_')
   print(paste('Writing',fname,'...'))
   ggsave(fname,wicons,bg='transparent',
-         width=3,height=3,units='in')
+         width=3.5,height=3.5,units='in')
   wicons
 }
 
 ###############################################################################
 
-makepng(geo_projects[1,])
+makepng(geo_projects[1,],hum_color='chocolate4',dev_color='springgreen1')
 
 for (i in 1:5) {
   makepng(geo_budget[i,],scale='budget')
@@ -142,5 +143,6 @@ for (i in 1:4) {
 }
 
 red <- legend_projects[1,]
+red$mission <- 'humanitarian'
 red[1,c('other_dev','other_hum')] <- c(0,1)
 makepng(red)

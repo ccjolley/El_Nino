@@ -1,7 +1,7 @@
 library(XLConnect)
 library(plyr)
 
-setwd("C:/Users/Craig/Desktop/El Nino")
+setwd("C:/Users/Craig/Desktop/Live Projects/El Nino")
 en <- readWorksheetFromFile('El Nino Data Tracking Sheet.xlsx.xlsx',sheet=1)
 names(en) <- c('mission','activity','loc','disbursed','obligated',
                'humanitarian','embedded','ongoing','modified','food',
