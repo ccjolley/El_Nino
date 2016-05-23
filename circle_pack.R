@@ -15,7 +15,8 @@ setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
 
 ###############################################################################
 
-makepng <- function(row,scale='projects',hum_color='#EBE85D',dev_color='#6CAFCC') {
+makepng <- function(row,scale='projects',hum_color='#fc8d59',
+                    dev_color='#91bfdb',icons=TRUE) {
   # right now the 'scale' option doesn't do anything; in the future I'll want
   # to be able to scale by either number of projects or total funding level.
   country <- row[1,1]
@@ -82,26 +83,28 @@ makepng <- function(row,scale='projects',hum_color='#EBE85D',dev_color='#6CAFCC'
   labels$ymin <- labels$y - labels$r/sqrt(2)
   labels$ymax <- labels$y + labels$r/sqrt(2)
   
-  labels[grep('^food_',labels$text),'fname'] <- '../icon_food.png'
-  labels[grep('^nutrition_',labels$text),'fname'] <- '../icon_nutrition.png'
-  labels[grep('^wash_',labels$text),'fname'] <- '../icon_WASH.png'
-  labels[grep('^ag_',labels$text),'fname'] <- '../icon_ag.png'
-  labels[grep('^health_',labels$text),'fname'] <- '../icon_health.png'
-  labels[grep('^ed_',labels$text),'fname'] <- '../icon_education.png'
-  labels[grep('^shelter_',labels$text),'fname'] <- '../icon_shelter.png'
-  labels[grep('^protection_',labels$text),'fname'] <- '../icon_protection.png'
+  labels[grep('^food_',labels$text),'fname'] <- '../icons/gray_food.png'
+  labels[grep('^nutrition_',labels$text),'fname'] <- '../icons/gray_nutrition.png'
+  labels[grep('^wash_',labels$text),'fname'] <- '../icons/gray_WASH.png'
+  labels[grep('^ag_',labels$text),'fname'] <- '../icons/gray_ag.png'
+  labels[grep('^health_',labels$text),'fname'] <- '../icons/gray_health.png'
+  labels[grep('^ed_',labels$text),'fname'] <- '../icons/gray_education.png'
+  labels[grep('^shelter_',labels$text),'fname'] <- '../icons/gray_shelter.png'
+  labels[grep('^protection_',labels$text),'fname'] <- '../icons/gray_protection.png'
+  labels[grep('^other_',labels$text),'fname'] <- '../icons/gray_other.png'
   wicons <- notext 
-  for (i in labels[!is.na(labels$fname),'id']) {
-    img <- readPNG(labels[labels$id==i,'fname'])
-    g <- rasterGrob(img, interpolate=TRUE)
-    wicons <- wicons + annotation_custom(g, 
-                                         xmin=labels[labels$id==i,'xmin'], 
-                                         xmax=labels[labels$id==i,'xmax'], 
-                                         ymin=labels[labels$id==i,'ymin'], 
-                                         ymax=labels[labels$id==i,'ymax'])
-    
+  if (icons) {
+    for (i in labels[!is.na(labels$fname),'id']) {
+      img <- readPNG(labels[labels$id==i,'fname'])
+      g <- rasterGrob(img, interpolate=TRUE)
+      wicons <- wicons + annotation_custom(g, 
+                                           xmin=labels[labels$id==i,'xmin'], 
+                                           xmax=labels[labels$id==i,'xmax'], 
+                                           ymin=labels[labels$id==i,'ymin'], 
+                                           ymax=labels[labels$id==i,'ymax'])
+    }
   }
-  fname=paste(country,scale,'0517.png',sep='_')
+  fname=paste(country,scale,'0523.png',sep='_')
   print(paste('Writing',fname,'...'))
   ggsave(fname,wicons,bg='transparent',
          width=3.5,height=3.5,units='in')
@@ -109,8 +112,6 @@ makepng <- function(row,scale='projects',hum_color='#EBE85D',dev_color='#6CAFCC'
 }
 
 ###############################################################################
-
-makepng(geo_projects[1,],hum_color='chocolate4',dev_color='springgreen1')
 
 for (i in 1:5) {
   makepng(geo_budget[i,],scale='budget')
@@ -131,18 +132,18 @@ quantile(m,na.rm=TRUE)
 legend_budget <- geo_budget[1:4,]
 legend_budget$mission <- c('100k','1M','10M','100M')
 legend_budget[,2:21] <- 0
-legend_budget$other_dev <- c(1e5,1e6,1e7,1e8)
+legend_budget$other_dev <- c(1.5,1e6,1e7,1e8)
 
 legend_projects <- legend_budget
 legend_projects$mission <- c('1','2','5','10')
 legend_projects$other_dev <- c(1,2,5,10)
 
 for (i in 1:4) {
-  makepng(legend_budget[i,],scale='budget')
-  makepng(legend_projects[i,])
+  makepng(legend_budget[i,],scale='budget',icons=FALSE)
+  makepng(legend_projects[i,],icons=FALSE)
 }
 
 red <- legend_projects[1,]
 red$mission <- 'humanitarian'
 red[1,c('other_dev','other_hum')] <- c(0,1)
-makepng(red)
+makepng(red,icons=FALSE)

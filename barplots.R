@@ -17,7 +17,7 @@ budget_totals <- colSums(geo_budget[,4:21])
 
 
 # Plotting function
-myplot <- function(d,hum_color='#EBE85D',dev_color='#6CAFCC') {
+myplot <- function(d,hum_color='#fc8d59',dev_color='#91bfdb') {
   d_reshape <- data.frame(label=labels,dev=d[2*1:9-1],
                                hum=d[2*1:9]) 
   label_sort <- as.character(d_reshape$label[order(d_reshape$dev + d_reshape$hum)])

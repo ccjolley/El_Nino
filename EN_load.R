@@ -21,6 +21,31 @@ en$disbursed <- gsub(' ','',en$disbursed)
 en$disbursed <- as.integer(en$disbursed)
 en[is.na(en$disbursed),'disbursed'] <- 0
 
+# In Ethiopia, disbursed funds are typically larger than obligated funds;
+# it's not clear which fiscal years they're counting as obligated, but 
+# the disbursed column seems to contain the total amount.
+
+# In Malawi, every project is either all disbursed or all obligated; no 
+# conflicts.
+
+# In Mozambique, the one project with budget information seems to be using the
+# disbursed column to track expenditure to date on an ongoing project -- the
+# obligated column is probably the total project budget.
+
+# Madagascar is only counting disbursed funds.
+
+# In Zimbabwe, most projects seem to use the "obligated" column for the total,
+# except for row 64 where it seems to be the sum of the two.
+
+en$budget <- en$disbursed + en$obligated
+en[en$mission=='Ethiopia' & en$disbursed > en$obligated,'budget'] <- 
+  en[en$mission=='Ethiopia' & en$disbursed > en$obligated,'disbursed']  
+en[en$mission=='Mozambique' & en$obligated > en$disbursed,'budget'] <- 
+  en[en$mission=='Mozambique' & en$obligated > en$disbursed,'obligated']
+en[en$mission=='Zimbabwe' & en$obligated > en$disbursed,'budget'] <- 
+  en[en$mission=='Zimbabwe' & en$obligated > en$disbursed,'obligated']
+en[64,'budget'] <- en[64,'disbursed'] + en[64,'obligated']
+
 # turn the "sectoral" columns into binary variables: 1 if the string contains 
 # non-whitespace; 0 otherwise
 
@@ -53,8 +78,8 @@ double_count <- assign_hum == assign_dev
 assign_hum[double_count] <- assign_hum[double_count]/2
 assign_dev[double_count] <- assign_dev[double_count]/2
 
-en$human_total <- rowSums(en[,c('disbursed','obligated')]) * assign_hum
-en$dev_total <- rowSums(en[,c('disbursed','obligated')]) * assign_dev
+en$human_total <- en$budget * assign_hum
+en$dev_total <- en$budget * assign_dev
 head(en[,c('disbursed','obligated','human_total','dev_total')],20)
 
 # split out activities by funding type
@@ -70,7 +95,7 @@ sum(en[,c('food','nutrition','wash','ag','health','ed','shelter','protection','o
 # I've counted 118 projects, but I only have 72 rows in my data frame; need to 
 # fix double-counting *within* hum/dev categories.
 overcount <- rowSums(en[,10:18])
-en[,21:38] <- en[,21:38] / overcount
+en[,22:39] <- en[,22:39] / overcount
 rm(overcount)
 
 en2 <- en[,c('mission','human_total','dev_total','food_dev','food_hum',
@@ -93,8 +118,8 @@ for (x in names(en)[10:18]) {
   n_hum <- paste(x,'_hum',sep='')
 #   b_dev <- en$dev_total*en[n_dev]
 #   b_hum <- en$human_total*en[,n_hum]
-  b_dev <- (en$disbursed+en$obligated)*en[n_dev]
-  b_hum <- (en$disbursed+en$obligated)*en[n_hum]
+  b_dev <- en$budget*en[n_dev]
+  b_hum <- en$budget*en[n_hum]
   en_budget[,n_dev] <- b_dev
   en_budget[,n_hum] <- b_hum
 }
@@ -103,9 +128,12 @@ rm(n_dev,n_hum,b_dev,b_hum)
 geo_budget <- ddply(en_budget,'mission',numcolwise(sum))
 
 # sanity check: make sure totals match
-sum(geo_budget[,2:19])
+sum(geo_budget[,4:21])
 sum(geo_projects[,c('human_total','dev_total')])
-sum(en[,c('disbursed','obligated')])
+sum(en$budget)
+
+nrow(en)
+sum(en[,22:39])
 
 rm(en,en2,en_budget)
 write.csv(geo_budget,'budget.csv',row.names=FALSE)
