@@ -16,7 +16,7 @@ setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
 ###############################################################################
 
 makepng <- function(row,scale='projects',hum_color='#fc8d59',
-                    dev_color='#91bfdb',icons=TRUE) {
+                    dev_color='#91bfdb',alpha=0.3, icons=TRUE) {
   # right now the 'scale' option doesn't do anything; in the future I'll want
   # to be able to scale by either number of projects or total funding level.
   country <- row[1,1]
@@ -58,7 +58,7 @@ makepng <- function(row,scale='projects',hum_color='#fc8d59',
   labels <- ddply(dat.after,'id',numcolwise(mean))
   labels$text <- n
   notext <- ggplot(dat.after) +
-    geom_polygon(aes(x, y, group=id), colour=dat.color, fill=dat.color, alpha=0.3) +
+    geom_polygon(aes(x, y, group=id), colour=dat.color, fill=dat.color, alpha=alpha) +
     coord_equal(xlim=limits, ylim=limits) +
     theme_classic() +
     theme(text=element_text(size=20),
