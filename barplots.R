@@ -1,9 +1,6 @@
-setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
-source('EN_load.R')
-setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
-
 library(ggplot2)
 library(reshape)
+library(plyr)
 library(dplyr)
 
 
@@ -11,13 +8,16 @@ library(dplyr)
 labels <- c('Food','Nutrition','WASH','Agriculture','Health','Education',
             'Shelter','Protection','Other')
 
+setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
+source('EN_load.R')
+setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
 # Aggregate by sector
 project_totals <- colSums(geo_projects[,4:21])
 budget_totals <- colSums(geo_budget[,4:21])
 
 
 # Plotting function
-myplot <- function(d,hum_color='#fc8d59',dev_color='#91bfdb') {
+myplot <- function(d,hum_color='#ba1f30',dev_color='#64a2d3',alpha=0.6) {
   d_reshape <- data.frame(label=labels,dev=d[2*1:9-1],
                                hum=d[2*1:9]) 
   label_sort <- as.character(d_reshape$label[order(d_reshape$dev + d_reshape$hum)])
@@ -26,7 +26,7 @@ myplot <- function(d,hum_color='#fc8d59',dev_color='#91bfdb') {
   d_reshape$label <- factor(d_reshape$label,levels=label_sort)
   
   ggplot(d_reshape,aes(x=label,y=value,fill=variable)) +
-    geom_bar(stat='identity',alpha=0.5) +
+    geom_bar(stat='identity',alpha=alpha) +
     theme_classic() +
     scale_fill_manual(values=c(dev_color,hum_color)) +
     coord_flip() 
@@ -45,13 +45,14 @@ budget <- myplot(budget_totals)
 budget
 budget_clean <- budget + clear_theme
 ggsave('budget_bars.png',budget_clean,bg='transparent',
-       width=6,height=11,units='cm')
+       width=8,height=11,units='cm')
 
 # Sector totals
-budget_totals[2*1:9-1] + budget_totals[2*1:9]
+(budget_totals[2*1:9-1] + budget_totals[2*1:9])/1e6
 
 # Country totals
-cbind(geo_budget[,1],rowSums(geo_budget[,2:3]))
+cbind(geo_budget[,1],geo_budget[,c('human_total','dev_total')]/1e6)
+cbind(geo_budget[,1],rowSums(geo_budget[,2:3])/1e6)
   
 
 # Project plot
@@ -62,7 +63,8 @@ ggsave('project_bars.png',project_clean,bg='transparent',
        width=6,height=11,units='cm')
 
 # Sector totals
-project_totals[2*1:9-1] + project_totals[2*1:9]
+proj_sect <- project_totals[2*1:9-1] + project_totals[2*1:9]
+100 * proj_sect / sum(proj_sect)
 
 # Country totals
 cbind(geo_projects[,1],rowSums(geo_projects[,4:21]))

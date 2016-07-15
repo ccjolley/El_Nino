@@ -12,11 +12,17 @@ library(grid)
 setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
 source('EN_load.R')
 setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
+source('Ethiopia.R')
+
+# Replace with data from Ethiopia-specific tracker
+geo_budget[1,] <- eth_totals
+# Remove countries with no budget numbers (for now, Lesotho & swaziland)
+geo_budget <- geo_budget[rowSums(geo_budget[,2:21]) != 0,]
 
 ###############################################################################
 
-makepng <- function(row,scale='projects',hum_color='#fc8d59',
-                    dev_color='#91bfdb',alpha=0.3, icons=TRUE) {
+makepng <- function(row,scale='projects',hum_color='#ba1f30',dev_color='#64a2d3',
+                    alpha=0.6, icons=TRUE) {
   # right now the 'scale' option doesn't do anything; in the future I'll want
   # to be able to scale by either number of projects or total funding level.
   country <- row[1,1]
@@ -104,7 +110,7 @@ makepng <- function(row,scale='projects',hum_color='#fc8d59',
                                            ymax=labels[labels$id==i,'ymax'])
     }
   }
-  fname=paste(country,scale,'0523.png',sep='_')
+  fname=paste(country,scale,'0629.png',sep='_')
   print(paste('Writing',fname,'...'))
   ggsave(fname,wicons,bg='transparent',
          width=3.5,height=3.5,units='in')
@@ -113,10 +119,12 @@ makepng <- function(row,scale='projects',hum_color='#fc8d59',
 
 ###############################################################################
 
-for (i in 1:5) {
+for (i in 1:nrow(geo_budget)) {
   makepng(geo_budget[i,],scale='budget')
-  makepng(geo_projects[i,])
+  #makepng(geo_projects[i,])
 }
+
+makepng(geo_budget[2,],scale='budget')
 
 # Make legend bubbles for budget and projects
 m <- as.matrix(geo_budget[,4:21])
