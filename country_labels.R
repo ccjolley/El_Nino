@@ -9,10 +9,10 @@ source('EN_load.R')
 # TODO: I'll eventually want to call this from a master script that will 
 # update everything.
 
-red <-  '#BA0C2F'  #'#C70F3B'
-blue <- '#006789' #'#012A6C'
-dgray <- '#6C6463'
-mgray <- '#8C8985'
+red <-  usaid_red
+blue <- med_blue
+dgray <- dk_gray
+mgray <- med_gray
 
 cbind(geo_budget[,1],geo_budget[,c('human_total','dev_total')]/1e6)
 cbind(geo_budget[,1],rowSums(geo_budget[,2:3])/1e6)
@@ -22,6 +22,7 @@ totals <- geo_budget %>%
             Hum.=human_total/1e6,
             Dev.=dev_total/1e6,
             Total=(human_total+dev_total)/1e6)
+totals[totals$mission=='Southern Africa Regional','mission'] <- 'S. Africa Regional'
 
 make_label <- function(i,width=1.5) {
   # make a country label for row i of totals
@@ -29,7 +30,6 @@ make_label <- function(i,width=1.5) {
   text_size <- 3*width
   title_size <- text_size/4
   lwidth <- width*0.7
-  print(paste('lwidth',lwidth))
   tmp <- totals[i,] %>% 
     melt(id.vars='mission') %>%
     mutate(cols=c(1,2,3),
@@ -59,6 +59,8 @@ make_label <- function(i,width=1.5) {
   p
 }
 
-make_label(1,width=1.5)
+for (i in 1:nrow(totals)) {
+  make_label(i,width=1.5)
+}
 
 # generate labels for all countries

@@ -6,7 +6,7 @@ library(dplyr)
 # Load data
 ###############################################################################
 setwd("C:/Users/Craig/Desktop/Live Projects/El Nino")
-fname <- 'El Nino Data Tracking Sheet_0708.xlsx'
+fname <- 'El Nino Data Tracking Sheet_0718.xlsx'
 en <- readWorksheetFromFile(fname,sheet=1)
 print(paste('Loaded data from',fname))
 names(en) <- c('mission','activity','loc','disbursed','obligated',
@@ -51,7 +51,6 @@ en[en$mission=='Malawi',c('disbursed','obligated')]
 # In the cases where both are present, go with the larger of the two.
 en[en$mission=='Mozambique',c('disbursed','obligated')]
 
-# Madagascar is only counting disbursed funds.
 en[en$mission=='Madagascar',c('disbursed','obligated')]
 
 # In Zimbabwe, consider the "obligated" column to be the total for the 
@@ -233,4 +232,15 @@ sum(en[,22:39])
 rm(en,en2,en_budget)
 write.csv(geo_budget,'budget.csv',row.names=FALSE)
 
+###############################################################################
+# Finally, adhere to USAID color palette
+###############################################################################
+
+usaid_red <- '#ba0c2f'
+usaid_blue <- '#002F6C'
+med_blue <- '#0067b9'
+dk_red <- '#651d32'
+dk_gray <- '#6c6463'
+med_gray <- '#8c8985'
+r_black <- '#212721'
 

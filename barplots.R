@@ -12,9 +12,7 @@ setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
 source('EN_load.R')
 setwd("C:/Users/Craig/Desktop/Live Projects/El Nino/El_Nino")
 # Aggregate by sector
-project_totals <- colSums(geo_projects[,4:21])
 budget_totals <- colSums(geo_budget[,4:21])
-
 
 # Plotting function
 myplot <- function(d,hum_color='#ba1f30',dev_color='#64a2d3',alpha=0.6) {
@@ -42,30 +40,24 @@ clear_theme <- theme(axis.ticks = element_blank(),
 
 # Budget plot
 budget <- myplot(budget_totals)
+# TODO: Somehow this step is broken now.
+
+add_us <- data.frame(label=labels,x=0,y=1:length(labels))
+
 budget
 budget_clean <- budget + clear_theme
+
+budget_clean + 
+  geom_text(data=add_us,aes(x=x,y=y,label=label))
+
+z=ggplot(data=add_us,aes(x=x,y=y,label=label)) + geom_text()
+
+z+budget_clean
+# Add sector labels
+# Add icons
+# Add total budget figures
+
+
 ggsave('budget_bars.png',budget_clean,bg='transparent',
        width=8,height=11,units='cm')
-
-# Sector totals
-(budget_totals[2*1:9-1] + budget_totals[2*1:9])/1e6
-
-# Country totals
-cbind(geo_budget[,1],geo_budget[,c('human_total','dev_total')]/1e6)
-cbind(geo_budget[,1],rowSums(geo_budget[,2:3])/1e6)
-  
-
-# Project plot
-project <- myplot(project_totals)
-project
-project_clean <- project + clear_theme
-ggsave('project_bars.png',project_clean,bg='transparent',
-       width=6,height=11,units='cm')
-
-# Sector totals
-proj_sect <- project_totals[2*1:9-1] + project_totals[2*1:9]
-100 * proj_sect / sum(proj_sect)
-
-# Country totals
-cbind(geo_projects[,1],rowSums(geo_projects[,4:21]))
 

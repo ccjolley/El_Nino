@@ -21,7 +21,7 @@ geo_budget <- geo_budget[rowSums(geo_budget[,2:21]) != 0,]
 
 ###############################################################################
 
-makepng <- function(row,scale='projects',hum_color='#ba1f30',dev_color='#64a2d3',
+makepng <- function(row,scale='projects',hum_color=usaid_red,dev_color=med_blue,
                     alpha=0.6, icons=TRUE) {
   # right now the 'scale' option doesn't do anything; in the future I'll want
   # to be able to scale by either number of projects or total funding level.
@@ -110,10 +110,10 @@ makepng <- function(row,scale='projects',hum_color='#ba1f30',dev_color='#64a2d3'
                                            ymax=labels[labels$id==i,'ymax'])
     }
   }
-  fname=paste(country,scale,'0629.png',sep='_')
+  fname=paste(country,scale,'0718.png',sep='_')
   print(paste('Writing',fname,'...'))
   ggsave(fname,wicons,bg='transparent',
-         width=3.5,height=3.5,units='in')
+         width=3,height=3,units='in')
   wicons
 }
 
