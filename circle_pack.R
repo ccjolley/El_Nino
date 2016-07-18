@@ -23,8 +23,6 @@ geo_budget <- geo_budget[rowSums(geo_budget[,2:21]) != 0,]
 
 makepng <- function(row,scale='projects',hum_color=usaid_red,dev_color=med_blue,
                     alpha=0.6, icons=TRUE) {
-  # right now the 'scale' option doesn't do anything; in the future I'll want
-  # to be able to scale by either number of projects or total funding level.
   country <- row[1,1]
   row <- row[1,4:21]
   n <- names(row)[row>0]

@@ -244,3 +244,5 @@ dk_gray <- '#6c6463'
 med_gray <- '#8c8985'
 r_black <- '#212721'
 
+print(paste('Total El Nino investment:',
+            sum(geo_budget[,4:21])/1e6))
